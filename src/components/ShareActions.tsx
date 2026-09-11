@@ -1,56 +1,121 @@
-import { useState } from 'react';
-import type { Result } from '../types';
+import { useEffect, useState } from 'react';
+import type { ShareSummary } from '../types/report';
 import { copyUrl, createShareUrl } from '../utils/share';
+import { renderShareImage } from '../utils/shareImage';
 import { LinkIcon, ShareIcon } from './Icons';
-export function ShareActions({ result, onRestart }: { result: Result; onRestart: () => void }) {
+import { ShareCard } from './ShareCard';
+import { serviceCopy } from '../data/serviceCopy';
+const copy = serviceCopy.share;
+export function ShareActions({
+  summary,
+  onRestart,
+}: {
+  summary: ShareSummary;
+  onRestart: () => void;
+}) {
   const [notice, setNotice] = useState(''),
     [manualUrl, setManualUrl] = useState('');
-  async function share(native: boolean) {
-    const url = createShareUrl(result);
+  const [image, setImage] = useState<{ blob: Blob; url: string } | null>(null),
+    [imageError, setImageError] = useState(false),
+    [preview, setPreview] = useState(false);
+  useEffect(() => {
+    let cancelled = false,
+      url = '';
+    setImage(null);
+    setImageError(false);
+    void renderShareImage(summary)
+      .then((blob) => {
+        if (cancelled) return;
+        url = URL.createObjectURL(blob);
+        setImage({ blob, url });
+      })
+      .catch(() => {
+        if (!cancelled) setImageError(true);
+      });
+    return () => {
+      cancelled = true;
+      if (url) URL.revokeObjectURL(url);
+    };
+  }, [summary]);
+  async function shareLink(native: boolean) {
+    const url = createShareUrl(summary);
     setNotice('');
     setManualUrl('');
     if (native && navigator.share) {
       try {
         await navigator.share({
-          title: `${result.title} · 타고난 우리 사이`,
-          text: `${result.parent.nickname} × ${result.child.nickname}, 우리의 케미는 ${result.score}점!`,
+          title: serviceCopy.name,
+          text: summary.title.replaceAll('\n', ' '),
           url,
         });
         return;
-      } catch (error) {
-        if (error instanceof Error && error.name === 'AbortError') return;
+      } catch (e) {
+        if (e instanceof Error && e.name === 'AbortError') return;
       }
     }
     try {
       await copyUrl(url);
-      setNotice('링크를 복사했어요. 소중한 사람에게 보내보세요.');
+      setNotice(copy.copied);
     } catch {
       setManualUrl(url);
-      setNotice('자동 복사가 어려워요. 아래 링크를 길게 눌러 복사해주세요.');
+      setNotice(copy.manual);
     }
   }
+  function save() {
+    if (!image) return;
+    const a = document.createElement('a');
+    a.href = image.url;
+    a.download = 'our-family-report.png';
+    document.body.append(a);
+    a.click();
+    a.remove();
+    setNotice(copy.downloaded);
+    setPreview(true);
+  }
+  async function shareImage() {
+    if (!image) return;
+    setNotice('');
+    const file = new File([image.blob], 'our-family-report.png', { type: 'image/png' });
+    try {
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: serviceCopy.name });
+        return;
+      }
+    } catch (e) {
+      if (e instanceof Error && e.name === 'AbortError') return;
+    }
+    save();
+  }
   return (
-    <section className="share-section">
-      <div className="section-eyebrow">좋은 이야기는 함께</div>
-      <h2>우리 사이, 자랑해볼까요?</h2>
-      <p>
-        별명과 결과만 공유돼요.
-        <br />
-        생년월일과 태어난 시간은 담지 않아요.
-      </p>
-      <button className="primary" onClick={() => void share(true)}>
+    <section className="share-section report-share">
+      <div className="section-eyebrow">{copy.eyebrow}</div>
+      <h2>{copy.title}</h2>
+      <p className="preserve-lines">{copy.description}</p>
+      <ShareCard summary={summary} />
+      <button className="primary" disabled={!image} onClick={() => void shareImage()}>
         <ShareIcon />
-        결과 공유하기
+        {!image && !imageError ? copy.busy : copy.imageButton}
       </button>
+      {imageError && <p role="status">{copy.imageError}</p>}
       <div className="share-secondary">
-        <button onClick={() => void share(false)}>
-          <LinkIcon />
-          링크 복사
+        <button disabled={!image} onClick={save}>
+          ↓ {copy.save}
         </button>
         <span />
-        <button onClick={onRestart}>↻ 다시 궁합 보기</button>
+        <button onClick={() => void shareLink(true)}>
+          <ShareIcon />
+          {copy.linkButton}
+        </button>
       </div>
-      <p className="share-privacy">링크를 받은 사람은 별명과 결과를 볼 수 있어요.</p>
+      <div className="share-secondary">
+        <button onClick={() => void shareLink(false)}>
+          <LinkIcon />
+          {copy.copy}
+        </button>
+        <span />
+        <button onClick={onRestart}>↻ {copy.restart}</button>
+      </div>
+      <p className="share-privacy">{copy.publicNote}</p>
       <div role="status" className="share-notice">
         {notice}
       </div>
@@ -62,6 +127,15 @@ export function ShareActions({ result, onRestart }: { result: Result; onRestart:
           value={manualUrl}
           onFocus={(e) => e.target.select()}
         />
+      )}
+      {preview && image && (
+        <div className="saved-image">
+          <p>{copy.preview}</p>
+          <img
+            src={image.url}
+            alt={`${summary.parent.nickname}와 ${summary.child.nickname}의 공유용 관계 카드`}
+          />
+        </div>
       )}
     </section>
   );

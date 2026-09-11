@@ -1,107 +1,85 @@
-import type { DisplayPerson, MetricKey, Result } from '../types';
-import { elements, zodiac } from '../data/zodiac';
-import { relationshipTypes } from '../data/relationshipTypes';
-const metricKeys: MetricKey[] = ['personality', 'conversation', 'rhythm', 'recovery', 'growth'];
-const textKeys = ['title', 'subtitle', 'good', 'friction', 'tip', 'wish', 'quote'] as const;
-function displayPerson(p: DisplayPerson): DisplayPerson {
-  return { nickname: p.nickname, role: p.role, zodiac: p.zodiac, element: p.element };
-}
-/** Explicit allowlist: never serialize PersonInput, Saju, birth dates, times, or pillars. */
-export function sharePayload(r: Result): Result {
+import type { RelationshipReport, ShareSummary } from '../types/report';
+import { readSharedResult as readLegacy } from './legacyShare';
+export { copyUrl } from './legacyShare';
+/** Construct a small public object; never serialize a Report directly. */
+export function sharePayload(r: RelationshipReport): ShareSummary {
   return {
-    version: 1,
-    parent: displayPerson(r.parent),
-    child: displayPerson(r.child),
-    score: r.score,
-    metrics: {
-      personality: r.metrics.personality,
-      conversation: r.metrics.conversation,
-      rhythm: r.metrics.rhythm,
-      recovery: r.metrics.recovery,
-      growth: r.metrics.growth,
-    },
-    typeId: r.typeId,
-    title: r.title,
-    subtitle: r.subtitle,
-    good: r.good,
-    friction: r.friction,
-    tip: r.tip,
-    wish: r.wish,
-    quote: r.quote,
-    unknownTime: r.unknownTime,
-    boundaryUncertain: r.boundaryUncertain,
+    version: 2,
+    parent: { nickname: r.parent.nickname, role: r.parent.role },
+    child: { nickname: r.child.nickname, role: r.child.role },
+    title: r.archetype.copy.title,
+    type: r.archetype.copy.type,
+    trigger: r.triggers[0]?.copy.title ?? '',
+    phrase: r.powerPhrase.copy.phrase,
   };
 }
-export function createShareUrl(r: Result, base = window.location.href) {
-  const data = new TextEncoder().encode(JSON.stringify(sharePayload(r)));
+const clean = (r: ShareSummary): ShareSummary => ({
+  version: 2,
+  parent: { nickname: r.parent.nickname, role: r.parent.role },
+  child: { nickname: r.child.nickname, role: r.child.role },
+  title: r.title,
+  type: r.type,
+  trigger: r.trigger,
+  phrase: r.phrase,
+  ...(r.legacy ? { legacy: true } : {}),
+});
+export function createShareUrl(summary: ShareSummary, base = window.location.href) {
+  const data = new TextEncoder().encode(JSON.stringify(clean(summary)));
   const token = btoa(String.fromCharCode(...data))
     .replaceAll('+', '-')
     .replaceAll('/', '_')
     .replace(/=+$/, '');
   const url = new URL(base);
   url.search = '';
-  url.hash = `result=${token}`;
+  url.hash = `report=${token}`;
   return url.href;
 }
-function validPerson(value: unknown, roles: string[]): value is DisplayPerson {
-  if (!value || typeof value !== 'object') return false;
-  const p = value as DisplayPerson;
-  return (
-    typeof p.nickname === 'string' &&
-    p.nickname.trim().length > 0 &&
-    p.nickname.length <= 12 &&
-    roles.includes(p.role) &&
-    Object.values(zodiac).includes(p.zodiac) &&
-    elements.includes(p.element)
-  );
-}
-export function readSharedResult(hash: string): Result | null {
-  if (!hash.startsWith('#result=') || hash.length > 16000) return null;
+export function readSharedResult(hash: string): ShareSummary | null {
+  if (hash.startsWith('#result=')) {
+    const old = readLegacy(hash);
+    return old
+      ? {
+          version: 2,
+          parent: { nickname: old.parent.nickname, role: old.parent.role },
+          child: { nickname: old.child.nickname, role: old.child.role },
+          title: old.subtitle,
+          type: old.title,
+          trigger: '',
+          phrase: old.tip,
+          legacy: true,
+        }
+      : null;
+  }
+  if (!hash.startsWith('#report=') || hash.length > 6000) return null;
   try {
     const token = hash.slice(8);
     if (!/^[A-Za-z0-9_-]+$/.test(token)) return null;
-    const bytes = Uint8Array.from(atob(token.replaceAll('-', '+').replaceAll('_', '/')), (c) =>
-      c.charCodeAt(0),
-    );
-    const r = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes)) as Result;
-    const scoreValid = (v: unknown) =>
-      typeof v === 'number' && Number.isInteger(v) && v >= 45 && v <= 98;
+    const r = JSON.parse(
+      new TextDecoder('utf-8', { fatal: true }).decode(
+        Uint8Array.from(atob(token.replaceAll('-', '+').replaceAll('_', '/')), (c) =>
+          c.charCodeAt(0),
+        ),
+      ),
+    ) as ShareSummary;
+    const str = (v: unknown, max: number) =>
+      typeof v === 'string' && v.trim().length > 0 && v.length <= max;
     if (
-      r.version !== 1 ||
-      !validPerson(r.parent, ['엄마', '아빠']) ||
-      !validPerson(r.child, ['딸', '아들']) ||
-      !scoreValid(r.score) ||
-      !r.metrics ||
-      !metricKeys.every((k) => scoreValid(r.metrics[k])) ||
-      !relationshipTypes.some((t) => t.id === r.typeId) ||
-      !textKeys.every((k) => typeof r[k] === 'string' && r[k].length > 0 && r[k].length <= 500) ||
-      typeof r.unknownTime !== 'boolean' ||
-      typeof r.boundaryUncertain !== 'boolean'
+      r.version !== 2 ||
+      !r.parent ||
+      !r.child ||
+      !str(r.parent.nickname, 12) ||
+      !str(r.child.nickname, 12) ||
+      !['엄마', '아빠'].includes(r.parent.role) ||
+      !['딸', '아들'].includes(r.child.role) ||
+      !str(r.title, 120) ||
+      !str(r.type, 50) ||
+      !(r.trigger === '' || str(r.trigger, 120)) ||
+      !str(r.phrase, 300) ||
+      (r.legacy !== undefined && typeof r.legacy !== 'boolean')
     )
       return null;
-    return sharePayload(r);
+    return clean(r);
   } catch {
     return null;
-  }
-}
-export async function copyUrl(url: string) {
-  if (navigator.clipboard?.writeText) {
-    try {
-      await navigator.clipboard.writeText(url);
-      return;
-    } catch {
-      /* use a selectable fallback */
-    }
-  }
-  const el = document.createElement('textarea');
-  el.value = url;
-  el.style.position = 'fixed';
-  el.style.opacity = '0';
-  document.body.append(el);
-  el.select();
-  try {
-    if (!document.execCommand('copy')) throw new Error('copy failed');
-  } finally {
-    el.remove();
   }
 }

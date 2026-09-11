@@ -1,0 +1,162 @@
+{
+  "asOfDate": "2026-09-11",
+  "modelVersion": "traits-v1",
+  "combinations": 12,
+  "uniqueArchetypes": 8,
+  "uniqueScenarios": 9,
+  "uniqueTriggerSets": 10,
+  "results": [
+    {
+      "name": "말띠 엄마와 쥐띠 딸",
+      "age": 6,
+      "archetype": "push-resist",
+      "title": "엄마가 밀수록\n딸는 더 버티는 사이",
+      "triggerIds": ["control-known", "explanation-length", "independent-command"],
+      "triggerTitles": [
+        "“엄마가 다 해봐서 알아.”",
+        "설명을 마쳤는데, 한 번 더 설명하기",
+        "“그냥 시키는 대로 해.”"
+      ],
+      "scenario": "tidy-zone",
+      "scene": "정리정돈 시간",
+      "phrase": "“방법은 네가 정해봐.”"
+    },
+    {
+      "name": "초등 아들과 아빠",
+      "age": 11,
+      "archetype": "child-plan",
+      "title": "아빠는 “그때 보자.”\n아들는 “몇 시에?”",
+      "triggerIds": ["speed-rush", "order-sudden", "emotion-neutral"],
+      "triggerTitles": ["“빨리 해.”", "“그냥 계획 바꿨어.”", "“좋으면 좋다고 좀 해.”"],
+      "scenario": "morning-pace",
+      "scene": "아침에 나갈 준비를 할 때",
+      "phrase": "“지금 하던 것 끝내고 가자.”"
+    },
+    {
+      "name": "사춘기 딸과 엄마",
+      "age": 14,
+      "archetype": "child-talk",
+      "title": "딸는 지금 말하고 싶은데\n엄마는 마음을 정리하는 중",
+      "triggerIds": ["speed-wait", "emotion-stop", "explanation-length"],
+      "triggerTitles": [
+        "“가만히 좀 기다려.”",
+        "“그게 울 일이야?”",
+        "설명을 마쳤는데, 한 번 더 설명하기"
+      ],
+      "scenario": "tidy-zone",
+      "scene": "정리정돈 시간",
+      "phrase": "“지금 기분부터 말해줘도 돼.”"
+    },
+    {
+      "name": "3세 아들과 엄마",
+      "age": 3,
+      "archetype": "same-rules",
+      "title": "둘 다 기준이 분명해서\n“내 말이 맞아”가 겹치는 사이",
+      "triggerIds": ["order-sudden", "expectation-baseline"],
+      "triggerTitles": ["“그냥 계획 바꿨어.”", "“알아서 할 줄 알았지.”"],
+      "scenario": "toddler-wait",
+      "scene": "대답을 기다릴 때",
+      "phrase": "“오늘 이만큼 한 건 봤어.”"
+    },
+    {
+      "name": "고등학생과 아빠",
+      "age": 17,
+      "archetype": "talk-space",
+      "title": "아빠는 지금 풀고 싶고,\n딸는 잠깐 쉬고 싶은 사이",
+      "triggerIds": ["speed-rush", "silence-demand", "emotion-neutral"],
+      "triggerTitles": ["“빨리 해.”", "“왜 대답을 안 해?”", "“좋으면 좋다고 좀 해.”"],
+      "scenario": "morning-pace",
+      "scene": "아침에 나갈 준비를 할 때",
+      "phrase": "“생각할 시간 줄게. 듣고 있어.”"
+    },
+    {
+      "name": "성인 자녀",
+      "age": 31,
+      "archetype": "child-talk",
+      "title": "아들는 지금 말하고 싶은데\n엄마는 마음을 정리하는 중",
+      "triggerIds": ["speed-wait", "emotion-stop", "explanation-length"],
+      "triggerTitles": [
+        "“가만히 좀 기다려.”",
+        "“그게 울 일이야?”",
+        "설명을 마쳤는데, 한 번 더 설명하기"
+      ],
+      "scenario": "adult-advice",
+      "scene": "성인 자녀에게 조언하고 싶을 때",
+      "phrase": "“지금 기분부터 말해줘도 돼.”"
+    },
+    {
+      "name": "초등 딸과 엄마",
+      "age": 8,
+      "archetype": "child-talk",
+      "title": "딸는 지금 말하고 싶은데\n엄마는 마음을 정리하는 중",
+      "triggerIds": ["control-known", "speed-wait", "emotion-stop"],
+      "triggerTitles": ["“엄마가 다 해봐서 알아.”", "“가만히 좀 기다려.”", "“그게 울 일이야?”"],
+      "scenario": "friend-listen",
+      "scene": "친구 이야기를 꺼냈을 때",
+      "phrase": "“지금 기분부터 말해줘도 돼.”"
+    },
+    {
+      "name": "영아 돌봄",
+      "age": 0,
+      "archetype": "infant-signals",
+      "title": "아직 말은 달라도,\n하나씩 신호를 맞춰가는 사이",
+      "triggerIds": ["infant-speed", "infant-expectation"],
+      "triggerTitles": ["달래는 방법을 연달아 바꾸기", "“왜 안 통하지?” 하며 스스로를 탓하기"],
+      "scenario": "infant-care",
+      "scene": "아이가 보채는 순간",
+      "phrase": "“여기 있어. 천천히 해도 돼.”"
+    },
+    {
+      "name": "입춘 경계와 시간 미상",
+      "age": 10,
+      "archetype": "double-flame",
+      "title": "둘 다 바로 말해서 싸우고,\n또 말하면서 풀리는 사이",
+      "triggerIds": ["emotion-stop", "explanation-length", "control-help"],
+      "triggerTitles": [
+        "“그게 울 일이야?”",
+        "설명을 마쳤는데, 한 번 더 설명하기",
+        "묻기 전에 대신 끝내주기"
+      ],
+      "scenario": "outing-choice",
+      "scene": "외출 준비 중",
+      "phrase": "“지금 기분부터 말해줘도 돼.”"
+    },
+    {
+      "name": "어린이집 나이 아이",
+      "age": 3,
+      "archetype": "push-resist",
+      "title": "아빠가 밀수록\n딸는 더 버티는 사이",
+      "triggerIds": ["speed-wait", "emotion-stop", "independent-command"],
+      "triggerTitles": ["“가만히 좀 기다려.”", "“그게 울 일이야?”", "“그냥 시키는 대로 해.”"],
+      "scenario": "toddler-emotion",
+      "scene": "마음이 터져 울 때",
+      "phrase": "“둘 중 어떤 걸 먼저 할래?”"
+    },
+    {
+      "name": "음력과 윤달",
+      "age": 6,
+      "archetype": "child-talk",
+      "title": "딸는 지금 말하고 싶은데\n엄마는 마음을 정리하는 중",
+      "triggerIds": ["speed-wait", "emotion-stop", "explanation-length"],
+      "triggerTitles": [
+        "“가만히 좀 기다려.”",
+        "“그게 울 일이야?”",
+        "설명을 마쳤는데, 한 번 더 설명하기"
+      ],
+      "scenario": "tidy-zone",
+      "scene": "정리정돈 시간",
+      "phrase": "“지금 기분부터 말해줘도 돼.”"
+    },
+    {
+      "name": "같은 띠 부자",
+      "age": 12,
+      "archetype": "double-silence",
+      "title": "싸움은 끝났는데\n둘 다 첫마디를 기다리는 부자",
+      "triggerIds": ["control-known", "speed-rush", "expectation-mindread"],
+      "triggerTitles": ["“아빠가 다 해봐서 알아.”", "“빨리 해.”", "“말 안 해도 알아야지.”"],
+      "scenario": "backtalk-reason",
+      "scene": "질문이 말대꾸처럼 들릴 때",
+      "phrase": "“생각할 시간 줄게. 듣고 있어.”"
+    }
+  ]
+}

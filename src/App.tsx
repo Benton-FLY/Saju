@@ -4,20 +4,21 @@ import { LandingPage } from './pages/LandingPage';
 import { InputPage } from './pages/InputPage';
 import { LoadingPage } from './pages/LoadingPage';
 import { ResultPage } from './pages/ResultPage';
+import { SharedPage } from './pages/SharedPage';
 import { readSharedResult } from './utils/share';
-import type { Result } from './types';
-type Page = 'home' | 'input' | 'loading' | 'result';
+import type { RelationshipReport } from './types/report';
+import { serviceCopy as copy } from './data/serviceCopy';
+type Page = 'home' | 'input' | 'loading' | 'result' | 'shared';
 export default function App() {
-  const [initial] = useState(() => readSharedResult(window.location.hash));
-  const [result, setResult] = useState<Result | null>(initial),
-    [page, setPage] = useState<Page>(initial ? 'result' : 'home'),
-    [shared, setShared] = useState(Boolean(initial));
-  const [badLink, setBadLink] = useState(Boolean(window.location.hash && !initial));
+  const [shared, setShared] = useState(() => readSharedResult(location.hash));
+  const [report, setReport] = useState<RelationshipReport | null>(null),
+    [page, setPage] = useState<Page>(shared ? 'shared' : 'home');
+  const [badLink, setBadLink] = useState(Boolean(location.hash && !shared));
   const complete = useCallback(() => setPage('result'), []);
   const goHome = () => {
     setPage('home');
-    setResult(null);
-    setShared(false);
+    setReport(null);
+    setShared(null);
     setBadLink(false);
     history.replaceState(null, '', location.pathname);
   };
@@ -27,23 +28,20 @@ export default function App() {
   };
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
-    if (page === 'home' || page === 'result') {
+    if (page !== 'input' && page !== 'loading') {
       const title = document.querySelector<HTMLElement>('#main h1');
       title?.setAttribute('tabindex', '-1');
       title?.focus({ preventScroll: true });
     }
-    document.title =
-      page === 'result' && result
-        ? `${result.title} · 타고난 우리 사이`
-        : '타고난 우리 사이 · 부모와 아이의 케미';
-  }, [page, result]);
+    document.title = copy.name + ' · ' + copy.subtitle;
+  }, [page]);
   useEffect(() => {
     const onHash = () => {
       const next = readSharedResult(location.hash);
-      setResult(next);
-      setShared(Boolean(next));
+      setReport(null);
+      setShared(next);
       setBadLink(Boolean(location.hash && !next));
-      setPage(next ? 'result' : 'home');
+      setPage(next ? 'shared' : 'home');
     };
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
@@ -51,10 +49,8 @@ export default function App() {
   return (
     <Layout onHome={goHome}>
       {badLink && (
-        <div role="alert" className="invalid-link">
-          공유 링크가 올바르지 않거나 손상되었어요.
-          <br />
-          새로운 우리 사이 이야기를 만들어보세요.
+        <div role="alert" className="invalid-link preserve-lines">
+          {copy.invalidLink}
         </div>
       )}
       {page === 'home' && <LandingPage onStart={start} />}
@@ -62,15 +58,14 @@ export default function App() {
         <InputPage
           onBack={goHome}
           onResult={(r) => {
-            setResult(r);
+            setReport(r);
             setPage('loading');
           }}
         />
       )}
       {page === 'loading' && <LoadingPage onComplete={complete} />}
-      {page === 'result' && result && (
-        <ResultPage result={result} shared={shared} onRestart={start} />
-      )}
+      {page === 'result' && report && <ResultPage report={report} onRestart={start} />}
+      {page === 'shared' && shared && <SharedPage summary={shared} onStart={start} />}
     </Layout>
   );
 }

@@ -1,10 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Spark } from '../components/Icons';
-const messages = [
-  '두 사람의 타고난 기운을 살펴보고 있어요',
-  '닮은 점과 다른 점을 찾고 있어요',
-  '우리만의 케미를 만들고 있어요',
-];
+import { serviceCopy } from '../data/serviceCopy';
+const copy = serviceCopy.loading;
 export function LoadingPage({ onComplete }: { onComplete: () => void }) {
   const [step, setStep] = useState(0);
   useEffect(() => {
@@ -24,17 +21,13 @@ export function LoadingPage({ onComplete }: { onComplete: () => void }) {
         <Spark />
         <span />
       </div>
-      <div className="section-eyebrow">우리의 인연을 읽는 중</div>
-      <h1>
-        둘의 이야기가
-        <br />
-        피어나고 있어요.
-      </h1>
+      <div className="section-eyebrow">{copy.eyebrow}</div>
+      <h1 className="preserve-lines">{copy.title}</h1>
       <p role="status" key={step} className="page-enter">
-        {messages[step]}
+        {copy.messages[step]}
       </p>
       <div className="loading-dots">
-        {messages.map((_, i) => (
+        {copy.messages.map((_, i) => (
           <i key={i} className={i === step ? 'active' : ''} />
         ))}
       </div>

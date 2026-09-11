@@ -3,7 +3,7 @@ import { calculateSaju } from './saju';
 import { branchAffinity, compatibility } from './compatibility';
 import { pairRelations, sharedTriples } from '../data/branchRelations';
 import { testCases } from '../data/testCases';
-import { createShareUrl, readSharedResult, sharePayload } from '../utils/share';
+import { createShareUrl, readSharedResult, sharePayload } from '../utils/legacyShare';
 import { familyName } from '../data/relationshipTypes';
 const { parent, child } = testCases[0];
 const calculate = (p = parent, c = child) =>

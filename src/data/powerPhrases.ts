@@ -1,0 +1,91 @@
+import type { CopyRule, PhraseCopy, Condition } from '../types/report';
+import { high as h, low as l, ahead as a } from './copyConditions';
+const p = (
+  id: string,
+  phrase: string,
+  why: string,
+  conditions: Condition[],
+  priority: number,
+  ageRange: readonly [number, number] = [3, 200],
+): CopyRule<PhraseCopy> => ({
+  id,
+  tags: ['PHRASE'],
+  conditions,
+  priority,
+  ageRange,
+  copy: { phrase, why },
+});
+export const powerPhrases: CopyRule<PhraseCopy>[] = [
+  p(
+    'your-method',
+    '“방법은 네가 정해봐.”',
+    '선택권을 지키려는 쪽으로 읽히는 아이에게는, 일을 없애주는 말보다 자기 몫을 남겨주는 말이 더 맞을 수 있어요. 부모가 허용할 수 있는 범위 안에서 건네보세요.',
+    [h('childAutonomyNeed', 65)],
+    95,
+  ),
+  p(
+    'your-reason',
+    '“네 생각부터 말해봐.”',
+    '납득할 이유를 찾는 쪽으로 읽혀요. 부모의 설명 전에 아이가 어디에서 막혔는지 먼저 들으면, 같은 설명을 세 번 반복하는 일을 줄여볼 수 있어요.',
+    [h('childCommunicationStyle', 60)],
+    93,
+  ),
+  p(
+    'feelings-first',
+    '“지금 기분부터 말해줘도 돼.”',
+    '표현이 먼저 나오는 기운으로 읽혀요. 정리된 설명부터 요구하기보다 지금의 감정부터 꺼내도 된다는 신호를 주세요.',
+    [h('childEmotionExpression', 60)],
+    92,
+  ),
+  p(
+    'wait-here',
+    '“생각할 시간 줄게. 듣고 있어.”',
+    '바로 답하기보다 잠깐 정리하는 쪽으로 읽혀요. 침묵을 재촉하지 않고 대답할 시간을 남겨주는 문장이에요.',
+    [l('childEmotionExpression', 40)],
+    94,
+  ),
+  p(
+    'finish-your-part',
+    '“지금 하던 것 끝내고 가자.”',
+    '부모와 아이의 전환 속도가 다르게 읽혀요. 다음 일을 반복해서 말하기보다 마무리할 지점을 하나 정해주는 말이에요.',
+    [a('parentSpeed', 'childSpeed', 18)],
+    91,
+  ),
+  p(
+    'clear-promise',
+    '“바뀌면 먼저 알려줄게.”',
+    '약속과 순서를 붙잡는 기운으로 읽혀요. 잘 달래겠다는 말보다 예고 없이 바꾸지 않겠다는 작은 약속을 남겨주세요.',
+    [h('childOrderNeed', 60)],
+    90,
+  ),
+  p(
+    'two-options',
+    '“둘 중 어떤 걸 먼저 할래?”',
+    '큰 결정까지 맡기는 대신, 지금 할 수 있는 두 가지에서 고르게 하는 말이에요. 어린아이에게도 선택권을 작게 남길 수 있어요.',
+    [h('childAutonomyNeed', 50)],
+    97,
+    [2, 5],
+  ),
+  p(
+    'enough-today',
+    '“오늘 이만큼 한 건 봤어.”',
+    '부모와 아이 모두 기준을 세우는 쪽이면 부족한 점부터 이야기하기 쉬워요. 구체적으로 본 행동 하나를 말한 뒤 다음 일을 정해보세요.',
+    [h('parentOrderNeed', 60), h('childOrderNeed', 60)],
+    96,
+  ),
+  p(
+    'one-together',
+    '“첫 번째는 같이 해보자.”',
+    '시작을 망설이는 장면에서는 전부 해결해주는 것보다 첫 동작만 함께하는 말을 써볼 수 있어요.',
+    [h('similarityLevel', 0)],
+    1,
+  ),
+  p(
+    'little-here',
+    '“여기 있어. 천천히 해도 돼.”',
+    '아직 말로 마음을 다 설명하기 어려운 시기예요. 영아의 기질을 단정하지 않고 부모가 곁에 있다는 신호를 남겨요.',
+    [h('similarityLevel', 0)],
+    200,
+    [0, 2],
+  ),
+];
